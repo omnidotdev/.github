@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Omni Community Discussions
+    url: https://github.com/orgs/omnidotdev/discussions
+    about: Ask general questions or share ideas with the community
+  - name: 📘 Contribution Guide
+    url: https://docs.omni.dev/contributing/overview
+    about: Learn how to contribute to the Omni ecosystem
+  - name: 🔒 Security Policy
+    url: mailto:security@omni.dev
+    about: Report sensitive security vulnerabilities privately

@@ -2,13 +2,6 @@ name: "💡 Feature Request"
 description: Suggest a new feature or improvement
 labels: [enhancement]
 body:
-  - type: input
-    id: summary
-    attributes:
-      label: Summary
-      placeholder: One sentence describing the feature
-    validations:
-      required: true
   - type: textarea
     id: problem
     attributes:

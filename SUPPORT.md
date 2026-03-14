@@ -1,9 +1,13 @@
 # Support
 
-Ask questions in our Discord:
+## Get Help
 
-👉 https://discord.gg/omnidotdev
+- [Discord](https://discord.gg/omnidotdev)
+- [Docs](https://docs.omni.dev)
 
-Docs: https://docs.omni.dev
+## Support Omni
+
+- [Sponsor on GitHub](https://github.com/sponsors/omnidotdev)
+- [Other ways to support](https://omni.dev/sponsors)
 
 GitHub issues are for **bugs and feature requests** only.

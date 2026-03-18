@@ -1,1 +1,44 @@
-[]
+{
+  "signedContributors": [
+    {
+      "name": "coopbri",
+      "id": 20056195,
+      "comment_id": 0,
+      "created_at": "2026-03-18T00:00:00Z",
+      "repoId": 0,
+      "pullRequestNo": 0
+    },
+    {
+      "name": "hobbescodes",
+      "id": 87732294,
+      "comment_id": 0,
+      "created_at": "2026-03-18T00:00:00Z",
+      "repoId": 0,
+      "pullRequestNo": 0
+    },
+    {
+      "name": "microcapgem",
+      "id": 229533743,
+      "comment_id": 0,
+      "created_at": "2026-03-18T00:00:00Z",
+      "repoId": 0,
+      "pullRequestNo": 0
+    },
+    {
+      "name": "Twonarly1",
+      "id": 72956780,
+      "comment_id": 0,
+      "created_at": "2026-03-18T00:00:00Z",
+      "repoId": 0,
+      "pullRequestNo": 0
+    },
+    {
+      "name": "benjamin-parks",
+      "id": 65567300,
+      "comment_id": 0,
+      "created_at": "2026-03-18T00:00:00Z",
+      "repoId": 0,
+      "pullRequestNo": 0
+    }
+  ]
+}

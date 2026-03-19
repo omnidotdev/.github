@@ -6,6 +6,9 @@ on:
   pull_request_target:
     types: [opened, closed, synchronize]
   workflow_call:
+    secrets:
+      GH_PAT:
+        required: true
 
 permissions:
   actions: read
@@ -28,10 +31,13 @@ jobs:
         uses: contributor-assistant/github-action@v2.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PAT }}
         with:
           path-to-signatures: "signatures/cla.json"
           path-to-document: "https://github.com/omnidotdev/.github/blob/master/CLA.md"
           branch: "master"
+          remote-organization-name: "omnidotdev"
+          remote-repository-name: ".github"
           allowlist: "bot*,dependabot[bot],renovate[bot],github-actions[bot]"
           custom-notsigned-prcomment: |
             Thank you for your contribution! Before we can accept it, please sign our [Contributor License Agreement](https://github.com/omnidotdev/.github/blob/master/CLA.md).

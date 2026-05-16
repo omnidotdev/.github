@@ -1,0 +1,55 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Omni org-wide Renovate defaults. Repos extend via `github>omnidotdev/.github`. Override per-repo only when necessary.",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "America/Denver",
+  "schedule": [
+    "every weekend"
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "branchConcurrentLimit": 10,
+  "rebaseWhen": "conflicted",
+  "packageRules": [
+    {
+      "description": "Group all non-major (>=1.0) updates into one weekly PR. Cuts the typical 30+ PRs/week of individual bumps down to one.",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Group + auto-merge GitHub Actions updates. Low risk (action versions), high volume otherwise.",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions",
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Auto-merge digest pins. These are SHA pin refreshes, no version change.",
+      "matchUpdateTypes": ["pin", "digest"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Auto-merge devDependencies patch bumps. Low-risk and high-frequency in TS repos.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"],
+    "automerge": true,
+    "automergeType": "pr",
+    "platformAutomerge": true
+  }
+}

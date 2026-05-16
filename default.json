@@ -3,7 +3,8 @@
   "description": "Omni org-wide Renovate defaults. Repos extend via `github>omnidotdev/.github`. Override per-repo only when necessary.",
   "extends": [
     "config:recommended",
-    ":pinDigests"
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests"
   ],
   "timezone": "America/Denver",
   "schedule": [
@@ -31,7 +32,7 @@
       "groupSlug": "all-minor-patch"
     },
     {
-      "description": "Group + auto-merge GitHub Actions updates. Safe because `:pinDigests` resolves them to immutable SHAs -- a compromised release cannot slip in through tag-tracking.",
+      "description": "Group + auto-merge GitHub Actions updates. Safe because `helpers:pinGitHubActionDigests` resolves them to immutable SHAs -- a compromised release cannot slip in through tag-tracking.",
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
       "groupSlug": "github-actions",

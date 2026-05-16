@@ -2,7 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "Omni org-wide Renovate defaults. Repos extend via `github>omnidotdev/.github`. Override per-repo only when necessary.",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":pinDigests"
   ],
   "timezone": "America/Denver",
   "schedule": [
@@ -12,6 +13,15 @@
   "prHourlyLimit": 2,
   "branchConcurrentLimit": 10,
   "rebaseWhen": "conflicted",
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "description": "Security/CVE updates bypass weekend schedule and require human review (never auto-merged). Routed via the `security` label for triage visibility.",
+    "labels": ["security"],
+    "schedule": ["at any time"],
+    "automerge": false,
+    "prCreation": "immediate",
+    "minimumReleaseAge": null
+  },
   "packageRules": [
     {
       "description": "Group all non-major (>=1.0) updates into one weekly PR. Cuts the typical 30+ PRs/week of individual bumps down to one.",
@@ -21,7 +31,7 @@
       "groupSlug": "all-minor-patch"
     },
     {
-      "description": "Group + auto-merge GitHub Actions updates. Low risk (action versions), high volume otherwise.",
+      "description": "Group + auto-merge GitHub Actions updates. Safe because `:pinDigests` resolves them to immutable SHAs -- a compromised release cannot slip in through tag-tracking.",
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
       "groupSlug": "github-actions",
@@ -30,19 +40,24 @@
       "platformAutomerge": true
     },
     {
-      "description": "Auto-merge digest pins. These are SHA pin refreshes, no version change.",
+      "description": "Auto-merge digest pins. These are SHA pin refreshes -- no version change.",
       "matchUpdateTypes": ["pin", "digest"],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
     },
     {
-      "description": "Auto-merge devDependencies patch bumps. Low-risk and high-frequency in TS repos.",
+      "description": "Auto-merge devDependencies patch bumps. Low-risk and high-frequency in TS repos; CI gates the merge.",
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["patch"],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
+    },
+    {
+      "description": "Production dependencies never auto-merge regardless of update type. Human review on the weekly grouped PR is the gate before code ships to users.",
+      "matchDepTypes": ["dependencies"],
+      "automerge": false
     }
   ],
   "lockFileMaintenance": {

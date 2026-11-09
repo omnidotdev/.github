@@ -112,7 +112,10 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      # Mirrors the shared commitlint type-enum. ECC uses "feature", not "feat".
+      # Mirrors the ECC type-enum from the styleguide. ECC accepts both the full
+      # word and its short alias for every aliased type, so list both (e.g.
+      # "feature" and "feat", "documentation" and "docs", "performance" and
+      # "perf"); either form passes.
       - uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -122,10 +125,14 @@ jobs:
             chore
             ci
             docs
+            documentation
+            feat
             feature
             fix
             perf
+            performance
             refactor
+            revert
             style
             test
           requireScope: false

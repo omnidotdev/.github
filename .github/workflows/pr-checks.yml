@@ -21,6 +21,11 @@ on:
       require-changeset:
         type: boolean
         default: false
+      # Extra globs (beyond the built-in docs/tests/CI defaults) whose changes
+      # do not require a changeset, e.g. a repo's unpublished demo apps.
+      extra-exempt-paths:
+        type: string
+        default: ""
 
 jobs:
   changeset:
@@ -56,20 +61,51 @@ jobs:
         if: steps.guard.outputs.enforce == 'true'
         with:
           fetch-depth: 0
-      - name: Require a .changeset entry
+      - name: Require a changeset when release-affecting files change
         if: steps.guard.outputs.enforce == 'true'
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
+          EXTRA_EXEMPT: ${{ inputs.extra-exempt-paths }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE"
+
+          # A changeset present (including an explicit empty one) always passes.
           added=$(git diff --name-only --diff-filter=A "origin/$BASE...HEAD" \
             | grep -E '^\.changeset/.+\.md$' | grep -v -E '/README\.md$' || true)
-          if [ -z "$added" ]; then
-            echo "::error::No changeset found. Add one with 'bun changeset' (or 'bun changeset --empty' for a no-release PR)."
-            exit 1
+          if [ -n "$added" ]; then
+            echo "Changeset(s) added:"
+            echo "$added"
+            exit 0
           fi
-          echo "Changeset(s) added:"
-          echo "$added"
+
+          # No changeset: only required if the PR touches files that ship.
+          # Docs, tests, CI, and repo-specific extras never need one.
+          exempt='**/*.md
+          .github/**
+          .changeset/**
+          **/*.test.*
+          **/*.spec.*
+          **/__tests__/**
+          LICENSE'
+          excludes=()
+          while IFS= read -r glob; do
+            glob="$(echo "$glob" | xargs)"
+            [ -n "$glob" ] && excludes+=(":(exclude,glob)$glob")
+          done <<EOF
+          $exempt
+          $EXTRA_EXEMPT
+          EOF
+
+          changed=$(git diff --name-only --diff-filter=ACMRD "origin/$BASE...HEAD" -- . "${excludes[@]}")
+          if [ -z "$changed" ]; then
+            echo "Only docs/tests/CI (non-release) files changed; no changeset required."
+            exit 0
+          fi
+
+          echo "::error::This PR changes release-affecting files but has no changeset. Add one with 'bun changeset' (or 'bun changeset --empty' to intentionally skip a release)."
+          echo "Release-affecting files:"
+          echo "$changed"
+          exit 1
 
   pr-title:
     runs-on: ubuntu-latest

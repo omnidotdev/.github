@@ -1,112 +1,18 @@
-# Reusable PR quality gates for omnidotdev repos.
+# Reusable PR quality gate for omnidotdev repos.
 #
-# Two conventions Omni already mandates, turned into status checks:
-#   - a changeset is present on releasable changes (presence only, not content)
-#   - the PR title is Extended Conventional Commits (ECC)
+# Enforces that the PR title is Extended Conventional Commits (ECC). Repos are
+# squash-only (allowMergeCommit/allowRebaseMerge both false), so the PR title
+# becomes the permanent commit subject on master, which is why the title is
+# gated here rather than per-commit. Changesets are advisory (the changeset
+# bot comments on every PR), not gated here.
 #
-# Repos are squash-only (allowMergeCommit/allowRebaseMerge both false), so the
-# PR title becomes the permanent commit subject on master, which is why the
-# title is gated here rather than per-commit.
-#
-# Status check contexts (from the caller's `checks` job):
-#   checks / changeset
-#   checks / pr-title
+# Status check context (from the caller's `checks` job): checks / pr-title
 name: PR Checks ✅
 
 on:
   workflow_call:
-    inputs:
-      # Only publishable package repos require a changeset. Defaults off so the
-      # gate never fires on deploy-only app/service repos.
-      require-changeset:
-        type: boolean
-        default: false
-      # Extra globs (beyond the built-in docs/tests/CI defaults) whose changes
-      # do not require a changeset, e.g. a repo's unpublished demo apps.
-      extra-exempt-paths:
-        type: string
-        default: ""
 
 jobs:
-  changeset:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      # Exemptions run inside the job (early exit 0) rather than a job-level
-      # `if:`, so the status context always reports success/failure and never
-      # "skipped" (a skipped required check blocks the PR).
-      - name: Determine whether to enforce
-        id: guard
-        env:
-          ACTOR: ${{ github.actor }}
-          HEAD: ${{ github.head_ref }}
-          REQUIRE: ${{ inputs.require-changeset }}
-        run: |
-          if [ "$REQUIRE" != "true" ]; then
-            echo "Changeset gate disabled for this repo."
-            echo "enforce=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          case "$ACTOR" in
-            renovate* | dependabot* | *'[bot]')
-              echo "Bot-authored PR, skipping changeset gate."
-              echo "enforce=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
-          esac
-          if [ "${HEAD#changeset-release/}" != "$HEAD" ]; then
-            echo "Release PR, skipping changeset gate."
-            echo "enforce=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          echo "enforce=true" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        if: steps.guard.outputs.enforce == 'true'
-        with:
-          fetch-depth: 0
-      - name: Require a changeset when release-affecting files change
-        if: steps.guard.outputs.enforce == 'true'
-        env:
-          BASE: ${{ github.event.pull_request.base.ref }}
-          EXTRA_EXEMPT: ${{ inputs.extra-exempt-paths }}
-        run: |
-          git fetch --no-tags --depth=1 origin "$BASE"
-
-          # A changeset present (including an explicit empty one) always passes.
-          added=$(git diff --name-only --diff-filter=A "origin/$BASE...HEAD" \
-            | grep -E '^\.changeset/.+\.md$' | grep -v -E '/README\.md$' || true)
-          if [ -n "$added" ]; then
-            echo "Changeset(s) added:"
-            echo "$added"
-            exit 0
-          fi
-
-          # No changeset: only required if the PR touches files that ship.
-          # Docs, tests, CI, and repo-specific extras never need one.
-          exempt='**/*.md
-          .github/**
-          .changeset/**
-          **/*.test.*
-          **/*.spec.*
-          **/__tests__/**
-          LICENSE'
-          excludes=()
-          while IFS= read -r glob; do
-            glob="$(echo "$glob" | xargs)"
-            [ -n "$glob" ] && excludes+=(":(exclude,glob)$glob")
-          done <<EOF
-          $exempt
-          $EXTRA_EXEMPT
-          EOF
-
-          changed=$(git diff --name-only --diff-filter=ACMRD "origin/$BASE...HEAD" -- . "${excludes[@]}")
-          if [ -z "$changed" ]; then
-            echo "Only docs/tests/CI (non-release) files changed; no changeset required."
-            exit 0
-          fi
-
-          echo "::error::This PR changes release-affecting files but has no changeset. Add one with 'bun changeset' (or 'bun changeset --empty' to intentionally skip a release)."
-          echo "Release-affecting files:"
-          echo "$changed"
-          exit 1
-
   pr-title:
     runs-on: ubuntu-latest
     permissions:

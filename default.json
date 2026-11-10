@@ -26,10 +26,22 @@
   },
   "packageRules": [
     {
-      "description": "Group all non-major updates (including 0.x) into one weekly PR. 0.x deps were previously excluded, so every internal @omnidotdev bump (all 0.x) opened a separate PR in every dependent repo, each running full CI; grouping collapses that to one PR per repo and is the main CI-cost lever.",
+      "description": "Group >=1.0 minor+patch updates and auto-merge when CI passes. Semver makes these backward-compatible and CI gates the merge, so minors flow automatically without a review pileup or extra CI.",
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "all non-major dependencies",
-      "groupSlug": "all-minor-patch"
+      "matchCurrentVersion": "!/^0/",
+      "groupName": "non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group 0.x minor+patch into a human-reviewed PR. In 0.x a minor can be breaking (semver does not apply), and these are mostly internal @omnidotdev packages, so review before merge. Still one grouped PR, so CI cost stays low.",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "/^0/",
+      "groupName": "0.x dependencies",
+      "groupSlug": "zerover",
+      "automerge": false
     },
     {
       "description": "Group all major (potentially breaking) updates into a single human-reviewed PR rather than one per dependency. Never auto-merged.",
@@ -55,17 +67,12 @@
       "platformAutomerge": true
     },
     {
-      "description": "Auto-merge devDependencies patch bumps. Low-risk and high-frequency in TS repos; CI gates the merge.",
+      "description": "Auto-merge 0.x devDependency patch bumps. These land in the 0.x review group above, but a devDependency patch is low-risk and does not ship to users, so let it auto-merge (CI still gates it).",
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["patch"],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
-    },
-    {
-      "description": "Production dependencies never auto-merge regardless of update type. Human review on the weekly grouped PR is the gate before code ships to users.",
-      "matchDepTypes": ["dependencies"],
-      "automerge": false
     }
   ],
   "lockFileMaintenance": {

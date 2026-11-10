@@ -65,9 +65,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ steps.cla-check.outcome }}" = "success" ]; then
+          # Org members/owners contribute as employees (work-for-hire, so the
+          # company already holds the rights) and bots cannot sign, so both pass
+          # without the signature flow. That also means this status no longer
+          # depends on the cross-repo GH_PAT the signature store needs, so it
+          # stops breaking when that token is absent. Only genuine external
+          # contributors still fall through to the real CLA check
+          ASSOC="${{ github.event.pull_request.author_association }}"
+          UTYPE="${{ github.event.pull_request.user.type }}"
+          if [ "${{ steps.cla-check.outcome }}" = "success" ] \
+            || [ "$ASSOC" = "OWNER" ] || [ "$ASSOC" = "MEMBER" ] \
+            || [ "$UTYPE" = "Bot" ]; then
             STATE="success"
-            DESC="All contributors have signed the CLA."
+            DESC="CLA satisfied (org member, bot, or signed)."
           else
             STATE="failure"
             DESC="CLA signature required."

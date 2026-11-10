@@ -14,6 +14,7 @@
   "prHourlyLimit": 2,
   "branchConcurrentLimit": 10,
   "rebaseWhen": "conflicted",
+  "minimumReleaseAge": "3 days",
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
     "description": "Security/CVE updates bypass weekend schedule and require human review (never auto-merged). Routed via the `security` label for triage visibility.",
@@ -25,11 +26,17 @@
   },
   "packageRules": [
     {
-      "description": "Group all non-major (>=1.0) updates into one weekly PR. Cuts the typical 30+ PRs/week of individual bumps down to one.",
+      "description": "Group all non-major updates (including 0.x) into one weekly PR. 0.x deps were previously excluded, so every internal @omnidotdev bump (all 0.x) opened a separate PR in every dependent repo, each running full CI; grouping collapses that to one PR per repo and is the main CI-cost lever.",
       "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": "!/^0/",
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Group all major (potentially breaking) updates into a single human-reviewed PR rather than one per dependency. Never auto-merged.",
+      "matchUpdateTypes": ["major"],
+      "groupName": "all major dependencies",
+      "groupSlug": "all-major",
+      "automerge": false
     },
     {
       "description": "Group + auto-merge GitHub Actions updates. Safe because `helpers:pinGitHubActionDigests` resolves them to immutable SHAs -- a compromised release cannot slip in through tag-tracking.",

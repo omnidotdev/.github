@@ -2,7 +2,7 @@
 
 **Reclaim Human Freedom in the Digital World.**
 
-[![Sponsor](https://img.shields.io/github/sponsors/omnidotdev?label=Sponsor&logo=github)](https://github.com/sponsors/omnidotdev)
+[![Sponsor on Crystal](https://img.shields.io/badge/Sponsor-Crystal-7c3aed)](https://crystal.omni.dev/@omni)
 
 Omni is an ecosystem of open-source software and tools built for creators, developers, and innovators.
 

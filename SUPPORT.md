@@ -7,7 +7,7 @@
 
 ## Support Omni
 
-- [Sponsor on GitHub](https://github.com/sponsors/omnidotdev)
+- [Sponsor on Crystal](https://crystal.omni.dev/@omni)
 - [Other ways to support](https://omni.dev/sponsors)
 
 GitHub issues are for **bugs and feature requests** only.
